@@ -1,6 +1,7 @@
 import antlr.AlgumaParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashMap;
@@ -23,7 +24,6 @@ public class MyListener extends AlgumaBaseListener{
 
     @Override
     public void enterNBlocoDeclaracao(AlgumaParser.NBlocoDeclaracaoContext ctx) {
-        System.out.println(ctx.getText());
         super.enterNBlocoDeclaracao(ctx);
     }
 
@@ -34,12 +34,16 @@ public class MyListener extends AlgumaBaseListener{
 
     @Override
     public void enterNDeclaracao(AlgumaParser.NDeclaracaoContext ctx) {
+        String tipo = ctx.getChild(0).getText();
+        String nome = ctx.getChild(1).getText();
+        if(tabSimbolos.containsKey(nome)){
+            System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
+//            throw new Error("Variavel já declarada!");
+        } else {
+            tabSimbolos.put(nome, tipo);
+        }
+        System.out.println(nome);
         super.enterNDeclaracao(ctx);
-    }
-
-    @Override
-    public void exitNDeclaracao(AlgumaParser.NDeclaracaoContext ctx) {
-        super.exitNDeclaracao(ctx);
     }
 
     @Override
@@ -48,18 +52,38 @@ public class MyListener extends AlgumaBaseListener{
     }
 
     @Override
-    public void exitNBlocoAlgoritmo(AlgumaParser.NBlocoAlgoritmoContext ctx) {
-        super.exitNBlocoAlgoritmo(ctx);
+    public void enterLer(AlgumaParser.LerContext ctx) {
+        super.enterLer(ctx);
     }
 
     @Override
-    public void enterNComando(AlgumaParser.NComandoContext ctx) {
-        super.enterNComando(ctx);
+    public void enterNImprimir(AlgumaParser.NImprimirContext ctx) {
+        super.enterNImprimir(ctx);
     }
 
     @Override
-    public void exitNComando(AlgumaParser.NComandoContext ctx) {
-        super.exitNComando(ctx);
+    public void enterNCondicao(AlgumaParser.NCondicaoContext ctx) {
+        super.enterNCondicao(ctx);
+    }
+
+    @Override
+    public void enterNRepeticao(AlgumaParser.NRepeticaoContext ctx) {
+        System.out.println(ctx.getText());
+        super.enterNRepeticao(ctx);
+    }
+
+    @Override
+    public void enterNAtribuicao(AlgumaParser.NAtribuicaoContext ctx) {
+        /* TODO - Verificar numero de filhos do valor
+         *   - Verificar existencia da variavel
+         *   - Verificar o tipo da variavel
+         *   - Verificar tipo do volor
+         *   - Verificar compatibilidade de tipos
+         * */
+        ParseTree valor = ctx.getChild(1);
+        String variavel = ctx.getChild(3).getText();
+
+        super.enterNAtribuicao(ctx);
     }
 
     @Override
