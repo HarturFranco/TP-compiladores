@@ -7,13 +7,16 @@ grammar Alguma;
 programa: (blocdec)? blocalg EOF #NPrograma;
 blocdec: DELIM 'DECLARACAO' (declaracao)* #NBlocoDeclaracao;
 declaracao: TIPO VAR #NDeclaracao;
-blocalg: DELIM 'ALGORITMO' comando #NBlocoAlgoritmo;
-comando: ( 'LER' VAR
-	| 'IMPRIMIR' (operacaoarit|operando|operacaolog)
-	| 'SE' operacaolog 'ENTAO'
-	| 'ENQUANTO' operacaolog 'INICIO' comando 'FIM'
-	| 'ATRIBUIR' (operacaoarit|operando|operacaolog) 'A' VAR
-		)* #NComando;
+blocalg: DELIM 'ALGORITMO' (comando)* #NBlocoAlgoritmo;
+
+comando: ler | imprimir | condicao | repeticao | atribuicao | WS;
+
+ler: 'LER' VAR;
+imprimir: 'IMPRIMIR' (operacaoarit|operando|operacaolog) #NImprimir;
+condicao: 'SE' operacaolog 'ENTAO'#NCondicao;
+repeticao: 'ENQUANTO' operacaolog 'INICIO' comando 'FIM' #NRepeticao;
+atribuicao: 'ATRIBUIR' (operacaoarit|operando|operacaolog) 'A' VAR #NAtribuicao;
+
 operacaoarit: operando OPARIT (operacaoarit|operando) #NOperacaoArit;
 operacaolog: (operacaoarit|operando) OPREL (operacaoarit|operando) #NOperacaoLog;
 operando: VAR|NUM|STR #NOperando;

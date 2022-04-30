@@ -58,17 +58,73 @@ public interface AlgumaListener extends ParseTreeListener {
 	 */
 	void exitNBlocoAlgoritmo(AlgumaParser.NBlocoAlgoritmoContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code NComando}
-	 * labeled alternative in {@link AlgumaParser#comando}.
+	 * Enter a parse tree produced by {@link AlgumaParser#comando}.
 	 * @param ctx the parse tree
 	 */
-	void enterNComando(AlgumaParser.NComandoContext ctx);
+	void enterComando(AlgumaParser.ComandoContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code NComando}
-	 * labeled alternative in {@link AlgumaParser#comando}.
+	 * Exit a parse tree produced by {@link AlgumaParser#comando}.
 	 * @param ctx the parse tree
 	 */
-	void exitNComando(AlgumaParser.NComandoContext ctx);
+	void exitComando(AlgumaParser.ComandoContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AlgumaParser#ler}.
+	 * @param ctx the parse tree
+	 */
+	void enterLer(AlgumaParser.LerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AlgumaParser#ler}.
+	 * @param ctx the parse tree
+	 */
+	void exitLer(AlgumaParser.LerContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NImprimir}
+	 * labeled alternative in {@link AlgumaParser#imprimir}.
+	 * @param ctx the parse tree
+	 */
+	void enterNImprimir(AlgumaParser.NImprimirContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NImprimir}
+	 * labeled alternative in {@link AlgumaParser#imprimir}.
+	 * @param ctx the parse tree
+	 */
+	void exitNImprimir(AlgumaParser.NImprimirContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NCondicao}
+	 * labeled alternative in {@link AlgumaParser#condicao}.
+	 * @param ctx the parse tree
+	 */
+	void enterNCondicao(AlgumaParser.NCondicaoContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NCondicao}
+	 * labeled alternative in {@link AlgumaParser#condicao}.
+	 * @param ctx the parse tree
+	 */
+	void exitNCondicao(AlgumaParser.NCondicaoContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NRepeticao}
+	 * labeled alternative in {@link AlgumaParser#repeticao}.
+	 * @param ctx the parse tree
+	 */
+	void enterNRepeticao(AlgumaParser.NRepeticaoContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NRepeticao}
+	 * labeled alternative in {@link AlgumaParser#repeticao}.
+	 * @param ctx the parse tree
+	 */
+	void exitNRepeticao(AlgumaParser.NRepeticaoContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NAtribuicao}
+	 * labeled alternative in {@link AlgumaParser#atribuicao}.
+	 * @param ctx the parse tree
+	 */
+	void enterNAtribuicao(AlgumaParser.NAtribuicaoContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NAtribuicao}
+	 * labeled alternative in {@link AlgumaParser#atribuicao}.
+	 * @param ctx the parse tree
+	 */
+	void exitNAtribuicao(AlgumaParser.NAtribuicaoContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code NOperacaoArit}
 	 * labeled alternative in {@link AlgumaParser#operacaoarit}.
