@@ -36,7 +36,7 @@ public class MyListener extends AlgumaBaseListener{
     public void enterNDeclaracao(AlgumaParser.NDeclaracaoContext ctx) {
         String tipo = ctx.getChild(0).getText();
         String nome = ctx.getChild(1).getText();
-        if(tabSimbolos.containsKey(nome)){
+        if(checkDeclaration(nome)){
             System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
 //            throw new Error("Variavel já declarada!");
         } else {
@@ -82,6 +82,52 @@ public class MyListener extends AlgumaBaseListener{
          * */
         ParseTree valor = ctx.getChild(1);
         String variavel = ctx.getChild(3).getText();
+        if (!checkDeclaration(variavel)){ // Variavel não declarada
+            System.out.println("Erro: a variavel " + variavel + " ainda não foi declarada!");
+//            throw new Error("Variavel nao declarada");
+        } else { // Variavel declarada, verifica tipo
+            String tipoVar = tabSimbolos.get(variavel);
+            String tipoVal;
+            System.out.println(valor.getChildCount());
+            if (valor.getChildCount() == 1){ // valor tem um noh filho
+                String valorTexto = valor.getChild(0).getText();
+                tipoVal = checkValueType(valorTexto); // tipo de valor
+                if (!tipoVar.equals(tipoVal)){ // nao tem mesmo tipo
+                    throw new Error("Valor do tipo '" + tipoVal +
+                            "' não pode ser atribuido à variavel '" +
+                            variavel + "' de tipo '" + tipoVar + "'!");
+                }
+
+            } else if (valor.getChildCount() > 1){ // TODO - atribuicao por operacao
+                String op = valor.getChild(1).getText();
+                System.out.println(op);
+                switch (op){
+                    case "<=":
+                    case ">=":
+                    case "=":
+                    case "<":
+                    case ">":
+                        tipoVal = "Bool";
+                        break;
+                    case "+":
+                    case "-":
+                    case "*":
+                    case "/":
+                        tipoVal = "int"; // TODO - Verificar tipo da operacao
+                        break;
+                    default:
+                        tipoVal = "float"; // TODO - Teste, tem que tirar
+                        break;
+                }
+                if(!tipoVal.equals(tipoVar)){
+                    throw new Error("Valor do tipo '" + tipoVal +
+                            "' não pode ser atribuido à variavel '" +
+                            variavel + "' de tipo '" + tipoVar + "'!");
+                }
+            }
+
+        }
+
 
         super.enterNAtribuicao(ctx);
     }
@@ -134,5 +180,27 @@ public class MyListener extends AlgumaBaseListener{
     @Override
     public void visitErrorNode(ErrorNode node) {
         super.visitErrorNode(node);
+    }
+
+    private boolean checkDeclaration(String nome){
+        return tabSimbolos.containsKey(nome);
+    }
+
+    private String checkValueType(String value){
+        String type = tabSimbolos.get(value);
+        if (type != null){
+            return type;
+        }
+
+        if (value.contains("\"")){
+            type = "string";
+        } else if (value.contains(",")) {
+            type = "float";
+        } else if (value.equals("true") || value.equals("false")){
+            type = "Bool";
+        } else {
+            type = "int";
+        }
+        return type;
     }
 }
