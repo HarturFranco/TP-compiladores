@@ -37,8 +37,8 @@ public class MyListener extends AlgumaBaseListener{
         String tipo = ctx.getChild(0).getText();
         String nome = ctx.getChild(1).getText();
         if(checkDeclaration(nome)){
-            System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
-//            throw new Error("Variavel já declarada!");
+//            System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
+            throw new Error("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
         } else {
             tabSimbolos.put(nome, tipo);
         }
@@ -74,11 +74,12 @@ public class MyListener extends AlgumaBaseListener{
 
     @Override
     public void enterNAtribuicao(AlgumaParser.NAtribuicaoContext ctx) {
-        /* TODO - Verificar numero de filhos do valor
-         *   - Verificar existencia da variavel
-         *   - Verificar o tipo da variavel
-         *   - Verificar tipo do volor
-         *   - Verificar compatibilidade de tipos
+        /* TODO -
+         *      - Verificar compatibilidade de tipos
+         * Verificar numero de filhos do valor
+         * Verificar existencia da variavel
+         * Verificar o tipo da variavel
+         * Verificar tipo do volor
          * */
         ParseTree valor = ctx.getChild(1);
         String variavel = ctx.getChild(3).getText();
@@ -98,7 +99,7 @@ public class MyListener extends AlgumaBaseListener{
                             variavel + "' de tipo '" + tipoVar + "'!");
                 }
 
-            } else if (valor.getChildCount() > 1){ // TODO - atribuicao por operacao
+            } else if (valor.getChildCount() > 1){
                 String op = valor.getChild(1).getText();
                 System.out.println(op);
                 switch (op){
@@ -113,13 +114,13 @@ public class MyListener extends AlgumaBaseListener{
                     case "-":
                     case "*":
                     case "/":
-                        tipoVal = "int"; // TODO - Verificar tipo da operacao
+                        tipoVal = checkOpAritType(valor);
                         break;
                     default:
-                        tipoVal = "float"; // TODO - Teste, tem que tirar
+                        tipoVal = "";
                         break;
                 }
-                if(!tipoVal.equals(tipoVar)){
+                if(!tipoVal.equals(tipoVar)){ // TODO - Logica:
                     throw new Error("Valor do tipo '" + tipoVal +
                             "' não pode ser atribuido à variavel '" +
                             variavel + "' de tipo '" + tipoVar + "'!");
@@ -134,6 +135,16 @@ public class MyListener extends AlgumaBaseListener{
 
     @Override
     public void enterNOperacaoArit(AlgumaParser.NOperacaoAritContext ctx) {
+        String val1 = ctx.getChild(0).getText();
+
+        for (int i = 0; i < ctx.getChildCount(); i++){
+            if (checkValueType(ctx.getChild(i).getText()).equals("Bool")
+                || checkValueType(ctx.getChild(i).getText()).equals("string")){
+                throw new Error("linha " + ctx.getStart().getLine() + ":"
+                        + ctx.getStart().getCharPositionInLine()
+                        + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
+            }
+        }
         super.enterNOperacaoArit(ctx);
     }
 
@@ -143,7 +154,7 @@ public class MyListener extends AlgumaBaseListener{
     }
 
     @Override
-    public void enterNOperacaoLog(AlgumaParser.NOperacaoLogContext ctx) {
+    public void enterNOperacaoLog(AlgumaParser.NOperacaoLogContext ctx) { // TODO - STR/STR?
         super.enterNOperacaoLog(ctx);
     }
 
@@ -186,6 +197,17 @@ public class MyListener extends AlgumaBaseListener{
         return tabSimbolos.containsKey(nome);
     }
 
+    private String checkOpAritType(ParseTree op){
+        String type = "int";
+        for (int i = 0; i < op.getChildCount(); i++){
+            if (i%2 == 0){
+                if(checkValueType(op.getChild(i).getText()).equals("float"))
+                    type = "float";
+            }
+        }
+
+        return type;
+    }
     private String checkValueType(String value){
         String type = tabSimbolos.get(value);
         if (type != null){

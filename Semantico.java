@@ -7,19 +7,30 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Semantico {
     public static void main(String[] args) {
         AlgumaParser parser = getParser(args[0]);
         ParseTree ast = parser.programa();
 
-        System.out.println(ast.toStringTree());
+//        System.out.println(ast.toStringTree());
 
         MyListener listener = new MyListener();
 
         ParseTreeWalker walker = new ParseTreeWalker();
 
-        walker.walk(listener, ast);
+        List errorMessages = new ArrayList();
+
+        try{
+            walker.walk(listener, ast);
+        }catch (Error e){
+            errorMessages.add(e.getMessage());
+        }
+
+        System.out.println(errorMessages);
+
     }
     public static AlgumaParser getParser(String nomeArquivo){
         AlgumaParser parser = null;
@@ -29,7 +40,8 @@ public class Semantico {
             CommonTokenStream tokenStream = new CommonTokenStream(algumaLexer);
             parser = new AlgumaParser(tokenStream);
         } catch (IOException e){
-            e.printStackTrace();
+            System.out.println("Erro: " + e.getMessage());
+//            e.printStackTrace();
         }
         return parser;
     }
