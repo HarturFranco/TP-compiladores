@@ -21,15 +21,13 @@ public class Semantico {
 
         ParseTreeWalker walker = new ParseTreeWalker();
 
-        List<String> errorMessages = new ArrayList<>();
-
         try{
             walker.walk(listener, ast);
         }catch (Error e){
-            errorMessages.add(e.getMessage());
+            System.out.println(e.getMessage());
         }
 
-        System.out.println(errorMessages);
+//        System.out.println(errorMessages);
 
     }
     public static AlgumaParser getParser(String nomeArquivo){

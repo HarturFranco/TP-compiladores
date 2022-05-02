@@ -4,13 +4,16 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import antlr.AlgumaBaseListener;
 
 public class MyListener extends AlgumaBaseListener{
 
-    Map<String, String> tabSimbolos = new HashMap<String, String>();
+    Map<String, String> tabSimbolos = new HashMap<>();
+    List<String> errorList = new ArrayList<>();
 
     @Override
     public void enterNPrograma(AlgumaParser.NProgramaContext ctx) {
@@ -18,8 +21,19 @@ public class MyListener extends AlgumaBaseListener{
     }
 
     @Override
-    public void exitNPrograma(AlgumaParser.NProgramaContext ctx) {
+    public void exitNPrograma(AlgumaParser.NProgramaContext ctx){
+
+        String errorMessage = "Não foram encontrados nenhum erro semântico!";
+        int nErro = errorList.size();
+
+        if (nErro > 0){
+            errorMessage = "Erros semânticos(" + nErro + "): \n";
+            for (String error : errorList) {
+                errorMessage += "\n" + error;
+            }
+        }
         super.exitNPrograma(ctx);
+        throw new Error(errorMessage);
     }
 
     @Override
@@ -38,7 +52,8 @@ public class MyListener extends AlgumaBaseListener{
         String nome = ctx.getChild(1).getText();
         if(checkDeclaration(nome)){
 //            System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
-            throw new Error("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
+//            throw new Error("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
+            errorList.add("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
         } else {
             tabSimbolos.put(nome, tipo);
         }
@@ -74,8 +89,8 @@ public class MyListener extends AlgumaBaseListener{
 
     @Override
     public void enterNAtribuicao(AlgumaParser.NAtribuicaoContext ctx) {
-        /* TODO -
-         *      - Verificar compatibilidade de tipos
+        /* Fazendo:
+         * Verificar compatibilidade de tipos
          * Verificar numero de filhos do valor
          * Verificar existencia da variavel
          * Verificar o tipo da variavel
@@ -84,8 +99,11 @@ public class MyListener extends AlgumaBaseListener{
         ParseTree valor = ctx.getChild(1);
         String variavel = ctx.getChild(3).getText();
         if (!checkDeclaration(variavel)){ // Variavel não declarada
-            System.out.println("Erro: a variavel " + variavel + " ainda não foi declarada!");
+//            System.out.println("Erro: a variavel " + variavel + " ainda não foi declarada!");
 //            throw new Error("Variavel nao declarada");
+            errorList.add("linha " + ctx.getStart().getLine() + ":"
+                    + ctx.getStart().getCharPositionInLine()
+                    + " A variavel " + variavel + " ainda não foi declarada!");
         } else { // Variavel declarada, verifica tipo
             String tipoVar = tabSimbolos.get(variavel);
             String tipoVal;
@@ -94,7 +112,12 @@ public class MyListener extends AlgumaBaseListener{
                 String valorTexto = valor.getChild(0).getText();
                 tipoVal = checkValueType(valorTexto); // tipo de valor
                 if (!tipoVar.equals(tipoVal)){ // nao tem mesmo tipo
-                    throw new Error("Valor do tipo '" + tipoVal +
+//                    throw nerrorListew Error("Valor do tipo '" + tipoVal +
+//                            "' não pode ser atribuido à variavel '" +
+//                            variavel + "' de tipo '" + tipoVar + "'!");
+                    errorList.add("linha " + ctx.getStart().getLine() + ":"
+                            + ctx.getStart().getCharPositionInLine()
+                            + " Valor do tipo '" + tipoVal +
                             "' não pode ser atribuido à variavel '" +
                             variavel + "' de tipo '" + tipoVar + "'!");
                 }
@@ -102,28 +125,20 @@ public class MyListener extends AlgumaBaseListener{
             } else if (valor.getChildCount() > 1){
                 String op = valor.getChild(1).getText();
                 System.out.println(op);
-                switch (op){
-                    case "<=":
-                    case ">=":
-                    case "=":
-                    case "<":
-                    case ">":
-                        tipoVal = "Bool";
-                        break;
-                    case "+":
-                    case "-":
-                    case "*":
-                    case "/":
-                        tipoVal = checkOpAritType(valor);
-                        break;
-                    default:
-                        tipoVal = "";
-                        break;
-                }
+                tipoVal = switch (op) {
+                    case "<=", ">=", "=", "<", ">" -> "Bool";
+                    case "+", "-", "*", "/" -> checkOpAritType(valor);
+                    default -> "";
+                };
                 if(!tipoVal.equals(tipoVar)){ // TODO - Logica:
-                    throw new Error("Valor do tipo '" + tipoVal +
+                    errorList.add("linha " + ctx.getStart().getLine() + ":"
+                            + ctx.getStart().getCharPositionInLine()
+                            + " Valor do tipo '" + tipoVal +
                             "' não pode ser atribuido à variavel '" +
                             variavel + "' de tipo '" + tipoVar + "'!");
+//                    throw new Error("Valor do tipo '" + tipoVal +
+//                            "' não pode ser atribuido à variavel '" +
+//                            variavel + "' de tipo '" + tipoVar + "'!");
                 }
             }
 
@@ -140,9 +155,12 @@ public class MyListener extends AlgumaBaseListener{
         for (int i = 0; i < ctx.getChildCount(); i++){
             if (checkValueType(ctx.getChild(i).getText()).equals("Bool")
                 || checkValueType(ctx.getChild(i).getText()).equals("string")){
-                throw new Error("linha " + ctx.getStart().getLine() + ":"
+                errorList.add("linha " + ctx.getStart().getLine() + ":"
                         + ctx.getStart().getCharPositionInLine()
                         + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
+//                throw new Error("linha " + ctx.getStart().getLine() + ":"
+//                        + ctx.getStart().getCharPositionInLine()
+//                        + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
             }
         }
         super.enterNOperacaoArit(ctx);
