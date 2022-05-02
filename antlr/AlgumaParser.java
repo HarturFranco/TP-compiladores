@@ -21,7 +21,7 @@ public class AlgumaParser extends Parser {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, T__10=11, DELIM=12, TIPO=13, VAR=14, NUM=15, OPARIT=16, OPREL=17, 
-		STR=18, WS=19;
+		STR=18, WS=19, UNKOWN=20;
 	public static final int
 		RULE_programa = 0, RULE_blocdec = 1, RULE_declaracao = 2, RULE_blocalg = 3, 
 		RULE_comando = 4, RULE_ler = 5, RULE_imprimir = 6, RULE_condicao = 7, 
@@ -46,7 +46,7 @@ public class AlgumaParser extends Parser {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
-			"DELIM", "TIPO", "VAR", "NUM", "OPARIT", "OPREL", "STR", "WS"
+			"DELIM", "TIPO", "VAR", "NUM", "OPARIT", "OPREL", "STR", "WS", "UNKOWN"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -965,7 +965,7 @@ public class AlgumaParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0013i\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001\u0014i\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+

@@ -21,7 +21,7 @@ public class Semantico {
 
         ParseTreeWalker walker = new ParseTreeWalker();
 
-        List errorMessages = new ArrayList();
+        List<String> errorMessages = new ArrayList<>();
 
         try{
             walker.walk(listener, ast);
