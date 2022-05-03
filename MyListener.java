@@ -28,21 +28,12 @@ public class MyListener extends AlgumaBaseListener{
     }
 
     @Override
-    public void enterNBlocoDeclaracao(AlgumaParser.NBlocoDeclaracaoContext ctx) {
-        super.enterNBlocoDeclaracao(ctx);
-    }
-
-    @Override
-    public void exitNBlocoDeclaracao(AlgumaParser.NBlocoDeclaracaoContext ctx) {
-        super.exitNBlocoDeclaracao(ctx);
-    }
-
-    @Override
     public void enterNDeclaracao(AlgumaParser.NDeclaracaoContext ctx) {
         String tipo = ctx.getChild(0).getText();
         String nome = ctx.getChild(1).getText();
         if(checkDeclaration(nome)){
-            errorList.add("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
+            errorList.add("linha " + ctx.getStart().getLine() + ":"
+                    + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
         } else {
             tabSimbolos.put(nome, tipo);
         }
@@ -121,15 +112,11 @@ public class MyListener extends AlgumaBaseListener{
                 || checkValueType(ctx.getChild(i).getText()).equals("string")){
                 errorList.add("linha " + ctx.getStart().getLine() + ":"
                         + ctx.getStart().getCharPositionInLine()
-                        + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
+                        + " Não é possivel realizar operações aritmeticas valores do tipo: "
+                        + checkValueType(ctx.getChild(i).getText())  + "!");
             }
         }
         super.enterNOperacaoArit(ctx);
-    }
-
-    @Override
-    public void exitNOperacaoArit(AlgumaParser.NOperacaoAritContext ctx) {
-        super.exitNOperacaoArit(ctx);
     }
 
     @Override
@@ -168,7 +155,6 @@ public class MyListener extends AlgumaBaseListener{
         if (type != null){
             return type;
         }
-
         if (value.contains("\"")){
             type = "string";
         } else if (value.contains(",")) {
