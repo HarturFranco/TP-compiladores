@@ -1,8 +1,5 @@
 import antlr.AlgumaParser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,24 +9,18 @@ import antlr.AlgumaBaseListener;
 
 public class MyListener extends AlgumaBaseListener{
 
-    Map<String, String> tabSimbolos = new HashMap<>();
-    List<String> errorList = new ArrayList<>();
-
-    @Override
-    public void enterNPrograma(AlgumaParser.NProgramaContext ctx) {
-        super.enterNPrograma(ctx);
-    }
+    private Map<String, String> tabSimbolos = new HashMap<>();
+    private List<String> errorList = new ArrayList<>();
 
     @Override
     public void exitNPrograma(AlgumaParser.NProgramaContext ctx){
 
-        String errorMessage = "Não foram encontrados nenhum erro semântico!";
-        int nErro = errorList.size();
+        String errorMessage = "";
 
-        if (nErro > 0){
-            errorMessage = "Erros semânticos(" + nErro + "): \n";
+        if (getNumberSemanticError() > 0){
+            errorMessage = "";
             for (String error : errorList) {
-                errorMessage += "\n" + error;
+                errorMessage += error + "\n";
             }
         }
         super.exitNPrograma(ctx);
@@ -51,40 +42,23 @@ public class MyListener extends AlgumaBaseListener{
         String tipo = ctx.getChild(0).getText();
         String nome = ctx.getChild(1).getText();
         if(checkDeclaration(nome)){
-//            System.out.println("Erro: já foi declarado uma variavel de id: " + nome + "!");
-//            throw new Error("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
             errorList.add("linha " + ctx.getStart().getLine() + ":" + ctx.getStart().getCharPositionInLine() + " Variavel já declarada!");
         } else {
             tabSimbolos.put(nome, tipo);
         }
-        System.out.println(nome);
         super.enterNDeclaracao(ctx);
     }
 
     @Override
-    public void enterNBlocoAlgoritmo(AlgumaParser.NBlocoAlgoritmoContext ctx) {
-        super.enterNBlocoAlgoritmo(ctx);
-    }
-
-    @Override
     public void enterLer(AlgumaParser.LerContext ctx) {
+        String variavel = ctx.getChild(1).getText();
+        if (!checkDeclaration(variavel)){ // Variavel não declarada
+
+            errorList.add("linha " + ctx.getStart().getLine() + ":"
+                    + ctx.getStart().getCharPositionInLine()
+                    + " A variavel " + variavel + " ainda não foi declarada!");
+        }
         super.enterLer(ctx);
-    }
-
-    @Override
-    public void enterNImprimir(AlgumaParser.NImprimirContext ctx) {
-        super.enterNImprimir(ctx);
-    }
-
-    @Override
-    public void enterNCondicao(AlgumaParser.NCondicaoContext ctx) {
-        super.enterNCondicao(ctx);
-    }
-
-    @Override
-    public void enterNRepeticao(AlgumaParser.NRepeticaoContext ctx) {
-        System.out.println(ctx.getText());
-        super.enterNRepeticao(ctx);
     }
 
     @Override
@@ -95,26 +69,22 @@ public class MyListener extends AlgumaBaseListener{
          * Verificar existencia da variavel
          * Verificar o tipo da variavel
          * Verificar tipo do volor
-         * */
+         */
         ParseTree valor = ctx.getChild(1);
         String variavel = ctx.getChild(3).getText();
         if (!checkDeclaration(variavel)){ // Variavel não declarada
-//            System.out.println("Erro: a variavel " + variavel + " ainda não foi declarada!");
-//            throw new Error("Variavel nao declarada");
+
             errorList.add("linha " + ctx.getStart().getLine() + ":"
                     + ctx.getStart().getCharPositionInLine()
                     + " A variavel " + variavel + " ainda não foi declarada!");
         } else { // Variavel declarada, verifica tipo
             String tipoVar = tabSimbolos.get(variavel);
             String tipoVal;
-            System.out.println(valor.getChildCount());
+
             if (valor.getChildCount() == 1){ // valor tem um noh filho
                 String valorTexto = valor.getChild(0).getText();
                 tipoVal = checkValueType(valorTexto); // tipo de valor
                 if (!tipoVar.equals(tipoVal)){ // nao tem mesmo tipo
-//                    throw nerrorListew Error("Valor do tipo '" + tipoVal +
-//                            "' não pode ser atribuido à variavel '" +
-//                            variavel + "' de tipo '" + tipoVar + "'!");
                     errorList.add("linha " + ctx.getStart().getLine() + ":"
                             + ctx.getStart().getCharPositionInLine()
                             + " Valor do tipo '" + tipoVal +
@@ -124,27 +94,21 @@ public class MyListener extends AlgumaBaseListener{
 
             } else if (valor.getChildCount() > 1){
                 String op = valor.getChild(1).getText();
-                System.out.println(op);
                 tipoVal = switch (op) {
                     case "<=", ">=", "=", "<", ">" -> "Bool";
                     case "+", "-", "*", "/" -> checkOpAritType(valor);
                     default -> "";
                 };
-                if(!tipoVal.equals(tipoVar)){ // TODO - Logica:
+                if(!tipoVal.equals(tipoVar)){
                     errorList.add("linha " + ctx.getStart().getLine() + ":"
                             + ctx.getStart().getCharPositionInLine()
                             + " Valor do tipo '" + tipoVal +
                             "' não pode ser atribuido à variavel '" +
                             variavel + "' de tipo '" + tipoVar + "'!");
-//                    throw new Error("Valor do tipo '" + tipoVal +
-//                            "' não pode ser atribuido à variavel '" +
-//                            variavel + "' de tipo '" + tipoVar + "'!");
                 }
             }
 
         }
-
-
         super.enterNAtribuicao(ctx);
     }
 
@@ -158,9 +122,6 @@ public class MyListener extends AlgumaBaseListener{
                 errorList.add("linha " + ctx.getStart().getLine() + ":"
                         + ctx.getStart().getCharPositionInLine()
                         + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
-//                throw new Error("linha " + ctx.getStart().getLine() + ":"
-//                        + ctx.getStart().getCharPositionInLine()
-//                        + " Não é possivel realizar operações aritmeticas valores do tipo: " + checkValueType(ctx.getChild(i).getText())  + "!");
             }
         }
         super.enterNOperacaoArit(ctx);
@@ -177,38 +138,14 @@ public class MyListener extends AlgumaBaseListener{
     }
 
     @Override
-    public void exitNOperacaoLog(AlgumaParser.NOperacaoLogContext ctx) {
-        super.exitNOperacaoLog(ctx);
-    }
-
-    @Override
     public void enterOperando(AlgumaParser.OperandoContext ctx) {
+        if (ctx.VAR() != null){
+            if(!checkDeclaration(ctx.VAR().getText()))
+                errorList.add("linha " + ctx.getStart().getLine() + ":"
+                        + ctx.getStart().getCharPositionInLine()
+                        + " A variavel " + ctx.VAR() + " ainda não foi declarada!");
+        }
         super.enterOperando(ctx);
-    }
-
-    @Override
-    public void exitOperando(AlgumaParser.OperandoContext ctx) {
-        super.exitOperando(ctx);
-    }
-
-    @Override
-    public void enterEveryRule(ParserRuleContext ctx) {
-        super.enterEveryRule(ctx);
-    }
-
-    @Override
-    public void exitEveryRule(ParserRuleContext ctx) {
-        super.exitEveryRule(ctx);
-    }
-
-    @Override
-    public void visitTerminal(TerminalNode node) {
-        super.visitTerminal(node);
-    }
-
-    @Override
-    public void visitErrorNode(ErrorNode node) {
-        super.visitErrorNode(node);
     }
 
     private boolean checkDeclaration(String nome){
@@ -242,5 +179,8 @@ public class MyListener extends AlgumaBaseListener{
             type = "int";
         }
         return type;
+    }
+    public int getNumberSemanticError(){
+        return errorList.size();
     }
 }

@@ -14,6 +14,14 @@ import java.util.ArrayList;
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class AlgumaParser extends Parser {
 	static { RuntimeMetaData.checkVersion("4.10.1", RuntimeMetaData.VERSION); }
+	public int numberLexicalError = 0;
+	@Override
+	public void notifyErrorListeners(Token offendingToken, String msg, RecognitionException e) {
+		if (offendingToken.getType() == 20){
+			numberLexicalError++;
+		}
+		super.notifyErrorListeners(offendingToken, msg, e);
+	}
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
